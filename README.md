@@ -165,6 +165,9 @@ Bug reports with a signature are the most useful thing you can send: the fix and
 | [solana-ws-keepalive](https://github.com/blixvip/solana-ws-keepalive) | Subscriptions that reconnect on their own; `logsSubscribe` gives you signatures to parse. |
 | [pump-curve](https://github.com/blixvip/pump-curve) | The state of a pump.fun bonding curve, for the coins you see in parsed pump.fun buys. |
 | [sol-holders](https://github.com/blixvip/sol-holders) | Top holders of a token by wallet. |
+| [solana-swap-parser](https://github.com/blixvip/solana-swap-parser) | Per-DEX swap decoding (price, venue) when you need more than balance deltas. |
+| [solana-token-meta](https://github.com/blixvip/solana-token-meta) | Name, symbol and authorities for the mints that show up in a parsed transaction. |
+| [solana-priority-fee](https://github.com/blixvip/solana-priority-fee) | What to bid next time, from the same RPC. |
 
 ## License
 
