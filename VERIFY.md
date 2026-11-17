@@ -287,6 +287,50 @@ Every ID in `PROGRAM_LABELS` was checked against the project's own source or doc
 
 On all six fixtures `fee.priorityLamportsDeclared` (from the decoded Compute Budget instructions, or v1 `transactionConfig`) equals `fee.priorityLamports` (fee − 5,000 × signatures). For the two fixtures with no `SetComputeUnitLimit`, the default limit the parser works out (6,000 and 203,000) matches the limit the runtime printed in the logs ("consumed 105 of 203000").
 
+## Docs site (GitHub Pages, `docs/`)
+
+Checked 2026-11-17, Node v24.15.0, Windows 11. Every JavaScript block on `docs/index.html`, `docs/parse-solana-transaction-nodejs-without-web3js.html` and `docs/solana-transaction-priority-fee.html` was extracted from the HTML (entities unescaped), saved as `.mjs` and run against the public mainnet RPC, one at a time with 3 s pauses, with this repository installed as `solana-tx-parse` in a scratch folder. All five exited 0, and the output shown on the pages is the output they printed. The zero-dependency Compute Budget snippet was also run on the pump.fun buy `2axWwMEc…XBP1d`: `fee 8750 = base 5000 + priority 3750`, `price 25000 x limit 150000 = 3750`, matching the parser.
+
+The error quoted on the pages for a v1 transaction requested with `maxSupportedTransactionVersion: 0` is the public RPC's real answer (code `-32015`) for `2JRmPD7a…Fj7QpU`.
+
+## Integrations
+
+`examples/integrations/`. Both files import `solana-tx-parse` by name; Node resolves that to this package through its `exports` field, so they run unchanged inside the repo and in a project that installed it.
+
+### `http-endpoint/server.js`
+
+Started with `node examples/integrations/http-endpoint/server.js`, then:
+
+```
+$ curl localhost:8787/tx/x2nTgvSF…dpudKR          (first call: fetched from the public RPC)
+{"status":"success","feePayer":"H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS","fee":106500,"priority":101500,"transfers":1}
+HTTP 200 0.263686s
+$ curl "localhost:8787/tx/x2nTgvSF…dpudKR?format=text"   (second call: from the in-memory cache)
+Signature  x2nTgvSFFneAKW5W5mHcfMYhzen5o7Lfb1pBmepDQQDJZ4ud2Z7QpDxdYVVTVMDqG2e5TJ1qAA8zGDPAxdpudKR
+Status     success
+Slot       470,678,784 · 2026-11-17 21:08:28 UTC · version legacy
+HTTP 200 0.034393s
+$ curl localhost:8787/tx/notasig
+{ "error": "InvalidInputError", "message": "not a transaction signature: notasig" }    HTTP 400
+$ curl localhost:8787/foo
+{ "error": "use GET /tx/<signature>" }    HTTP 404
+$ curl localhost:8787/tx/1111111111111111111111111111111111111111111111111111111111111111
+{ "error": "TransactionNotFoundError", "message": "transaction 1111…1111 was not found: …" }    HTTP 404
+```
+
+The first JSON line is a summary of the response made with `node -e`; the body itself is the full `parseTransaction` result. Not exercised: the 502/503/504 branches (they map the library's `RpcError`, 429 and `RpcTimeoutError`, which `test/rpc.test.js` covers).
+
+### `discord-webhook/notify.js`
+
+- `--dry-run` on `x2nTgvSF…dpudKR` printed the webhook body: one embed, title `Confirmed transaction x2nT…udKR`, green, the CLI summary in a code block, fields Fee payer / Fee / Programs.
+- Sent for real to a **local stand-in webhook** (a `node:http` server on 127.0.0.1 that answers 204 like Discord): `DISCORD_WEBHOOK_URL=http://127.0.0.1:8790/api/webhooks/test node …/notify.js 5GdMZeap…kZP8` printed `posted 5GdM…kZP8 to Discord (HTTP 204)`; the server received `POST /api/webhooks/test application/json 1448 bytes`, embed `Failed transaction 5GdM…kZP8`, red, fields `Fee payer, Fee, Programs, Error`.
+- No webhook URL and no `--dry-run`: usage message, exit 1. Unreachable webhook: `TypeError: fetch failed`, exit 1.
+- **Not verified:** posting to a real Discord channel (no webhook URL was available for this check). The body follows Discord's documented webhook format (`username`, `embeds[]` with `title`, `url`, `color`, `description` up to 4,096 characters, `fields`, `timestamp`, `footer`).
+
+### Found while doing this
+
+`node bin/cli.js 1111…1111` (a well-formed but unknown signature) prints the right error and then crashes on Windows with `Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)`, exit code 127 instead of 1: `process.exit()` right after a fetch. solana-token-meta fixed the same thing by setting `process.exitCode`. Filed as an issue; the integration scripts already use `process.exitCode`.
+
 ## Not verified
 
 - `npx github:blixvip/solana-tx-parse …` and `npm install github:blixvip/solana-tx-parse`: the repo is not published; the same code was run as `node bin/cli.js` and via package self-reference.
