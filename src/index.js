@@ -28,7 +28,9 @@ export const isSignature = (s) => isBase58OfLength(s, 64);
  */
 export async function fetchTransaction(signature, opts = {}) {
   if (!isSignature(signature)) throw new InvalidInputError(`not a transaction signature: ${String(signature).slice(0, 20)}`);
-  const { rpcUrl = process.env.SOLANA_RPC_URL || PUBLIC_RPC, commitment = "confirmed", maxSupportedTransactionVersion = 0, autoVersion = true, ...net } = opts;
+  const { rpcUrl: rpcUrlOpt, commitment = "confirmed", maxSupportedTransactionVersion = 0, autoVersion = true, ...net } = opts;
+  // An empty string (e.g. an unset-but-exported env var) means "use the default", not "no URL".
+  const rpcUrl = rpcUrlOpt || process.env.SOLANA_RPC_URL || PUBLIC_RPC;
   const call = (version) => rpcCall("getTransaction", [signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: version, commitment }], { rpcUrl, ...net });
   let tx;
   try { tx = await call(maxSupportedTransactionVersion); }
