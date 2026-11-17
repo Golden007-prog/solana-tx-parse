@@ -329,7 +329,7 @@ The first JSON line is a summary of the response made with `node -e`; the body i
 
 ### Found while doing this
 
-`node bin/cli.js 1111…1111` (a well-formed but unknown signature) prints the right error and then crashes on Windows with `Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)`, exit code 127 instead of 1: `process.exit()` right after a fetch. solana-token-meta fixed the same thing by setting `process.exitCode`. Filed as an issue; the integration scripts already use `process.exitCode`.
+`node bin/cli.js 1111…1111` (a well-formed but unknown signature) prints the right error and then crashes on Windows with `Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)`, exit code 127 instead of 1: `process.exit()` right after a fetch. solana-token-meta fixed the same thing by setting `process.exitCode`. Filed as [#7](https://github.com/blixvip/solana-tx-parse/issues/7); the integration scripts already use `process.exitCode`.
 
 ## Not verified
 

@@ -171,6 +171,20 @@ Bug reports with a signature are the most useful thing you can send: the fix and
 
 `npm test` runs everything offline against real mainnet transactions in `test/fixtures`. `LIVE=1 npm test` also re-fetches two of them from the public RPC and checks the results match.
 
+## Good first issues
+
+New to the project? These are small, self-contained tasks, each with why, what to do, where, and when it is done:
+
+- [#1 Label the pump.fun fee program](https://github.com/blixvip/solana-tx-parse/issues/1)
+- [#3 Add mint, burn and close to `transfers`](https://github.com/blixvip/solana-tx-parse/issues/3)
+- [#5 Token-2022 transfer fees: fixture and `transferCheckedWithFee` support](https://github.com/blixvip/solana-tx-parse/issues/5)
+- [#7 CLI exits with code 127 on Windows after a network error](https://github.com/blixvip/solana-tx-parse/issues/7)
+- [#8 CLI: `--rpc` with no value silently uses the public RPC](https://github.com/blixvip/solana-tx-parse/issues/8)
+- [#9 CLI: accept several signatures](https://github.com/blixvip/solana-tx-parse/issues/9)
+- [#10 Label more DEX and launchpad programs](https://github.com/blixvip/solana-tx-parse/issues/10)
+
+All of them: [good first issue](https://github.com/blixvip/solana-tx-parse/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · bigger pieces and integration examples: [help wanted](https://github.com/blixvip/solana-tx-parse/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) · everything by area: the [Roadmap](https://github.com/blixvip/solana-tx-parse/issues/14) · questions and ideas: [Discussions](https://github.com/blixvip/solana-tx-parse/discussions/15). Comment "I'll take this" on an issue before you start.
+
 ## Related projects
 
 | | |
