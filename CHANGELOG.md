@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-11-17
+
+### Fixed
+
+- RPC timeouts now always fire. `AbortSignal.timeout()` runs on an unref'd timer, so when nothing else held the event loop open (a custom `fetch`, a stalled request) Node could exit before the timeout fired, leaving `fetchTransaction` / `parseTransaction` / `parseTransactions` unsettled instead of rejecting with `RpcTimeoutError`. The timeout now uses a ref'd timer that is cleared when the call finishes, and the 429 back-off no longer counts against the request timeout. Seen on Node 20 and 22.
+
+### Changed
+
+- CI runs every Node version in the matrix to completion (`fail-fast: false`).
+
 ## [1.0.0] - 2026-11-17
 
 ### Added

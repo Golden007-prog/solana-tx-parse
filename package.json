@@ -1,6 +1,6 @@
 {
   "name": "solana-tx-parse",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Turn a Solana transaction signature into a readable summary: fee and priority fee, status and error, programs invoked by name, balance changes per owner, SOL and SPL transfers, swaps. Zero dependencies. By Blix.",
   "type": "module",
   "main": "src/index.js",
