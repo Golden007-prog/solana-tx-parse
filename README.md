@@ -1,15 +1,20 @@
 # solana-tx-parse
 
-**A Solana transaction, in words.** Give it a signature and get back who paid, what it cost (base and priority fee), whether it failed and why, which programs ran, whose balances moved, the SOL and SPL transfers, and the swaps. Works for legacy, v0 (address lookup tables) and v1 transactions. Zero dependencies.
+**Solana transaction parser: any transaction signature, in words.** Give it a signature and get back who paid, what it cost (base and priority fee), whether it failed and why, which programs ran, whose balances moved, the SOL and SPL transfers, and the swaps. Works for legacy, v0 (address lookup tables) and v1 transactions. Zero dependencies.
 
 ![dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen)
 ![node: 20+](https://img.shields.io/badge/node-20%2B-blue)
 [![license: MIT](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/grokbot)
+[![GitHub stars](https://img.shields.io/github/stars/blixvip/solana-tx-parse?style=social)](https://github.com/blixvip/solana-tx-parse/stargazers)
 
 <a href="https://blixvip.com"><img src="assets/blix-hero.jpg" width="100%" alt="BLIX: AI-powered Solana memecoin terminal. Trade memes first."></a>
 
+**[Start trading at blixvip.com →](https://blixvip.com)** &nbsp;·&nbsp; [Public API](https://blixvip.com/api) &nbsp;·&nbsp; [MCP server](https://blixvip.com/mcp) &nbsp;·&nbsp; [Discord](https://discord.gg/grokbot)
+
 Built by the team behind **[Blix](https://blixvip.com)**, a Solana memecoin terminal that reads a lot of transactions; this is the small, open part that turns one into a summary.
+
+If solana-tx-parse saves you time, **[give it a ⭐](https://github.com/blixvip/solana-tx-parse)**. It helps other Solana developers find it.
 
 ## The problem
 
@@ -168,6 +173,12 @@ Bug reports with a signature are the most useful thing you can send: the fix and
 | [solana-swap-parser](https://github.com/blixvip/solana-swap-parser) | Per-DEX swap decoding (price, venue) when you need more than balance deltas. |
 | [solana-token-meta](https://github.com/blixvip/solana-token-meta) | Name, symbol and authorities for the mints that show up in a parsed transaction. |
 | [solana-priority-fee](https://github.com/blixvip/solana-priority-fee) | What to bid next time, from the same RPC. |
+
+## Contributors
+
+Every merged pull request is credited in the release notes. Pick a [good first issue](https://github.com/blixvip/solana-tx-parse/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or say hi in the [Discord](https://discord.gg/grokbot).
+
+<a href="https://github.com/blixvip/solana-tx-parse/graphs/contributors"><img src="https://contrib.rocks/image?repo=blixvip/solana-tx-parse" alt="Contributors to solana-tx-parse"></a>
 
 ## License
 
