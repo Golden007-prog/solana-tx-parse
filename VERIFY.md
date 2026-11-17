@@ -43,6 +43,10 @@ Captured with `getSignaturesForAddress` on the program or wallet named, then `ge
 | `failed.json` | `5GdMZeap3wrqtCkHRsc9M8UNCaKHD6cm9MoDT2xY39RJg5nW8sQ9inA6hWRCf4hXWgnqsb7Bb6NaYNojTvzGkZP8` | 470679566 | legacy | Failed bot tx touching pump.fun (custom error 6001) |
 | `jupiter-swap-v1.json` | `2JRmPD7aXWeSwvpax5M1MNgUyjJmL6ixxtoQz7osMTBnWSgPC1kCo5cnSKj1sWiZkEQh34dfuucRVYGTtEFj7QpU` | 470679249 | 1 | Jupiter v6 swap routed through PumpSwap, Meteora DLMM, Raydium CLMM |
 | `jupiter-swap-v0.json` (+ `.json-encoding.json`) | `4neabHc2bqNJSnwcmz1L7PvEozsFGLjKk59hwL13aBznowaPcN1ThLjvvPpzNWnGdaixg1ragf42WSNb8iN6FkjX` | 320000000 | 0 | Jupiter v6 arbitrage, 37 accounts from 5 lookup tables |
+| `ed25519-precompile.json` | `5bQ2mdKJBxqq331WrcEDtVErXTssvdGhVoCusYAEj29Wuvd76EkhKyaSPTwfTiMBq85X3smceEFi7zLEV6Nd8csN` | 378733286 | 0 | One transaction signature and one Ed25519 verification, `jsonParsed` encoding |
+| `secp256k1-precompile.json` | `4GhzwPcA3stDs2ao5JHuMBvoui6Matit3vb7bj4JjCcLTBLNHwoRwVcGZ27AKZc3cSxhYSKj47UttLmYQGyDGXLh` | 470706499 | 0 | Two transaction signatures and one secp256k1 verification, `json` encoding |
+
+The precompile fixtures are finalized `getTransaction` results from the public mainnet RPC. Their expected priority fees also match the independently decoded Compute Budget instructions. See Solana's [fee structure](https://solana.com/docs/core/fees/fee-structure) and [precompile instruction layouts](https://solana.com/docs/core/programs/precompiles).
 
 Finding while capturing: on 2026-11-17, of 47 recent successful Jupiter / Raydium CLMM / Meteora DLMM / Orca transactions sampled, 33 were **v1** and 14 were v0, and none of the v0 ones used lookup tables. `getTransaction` with `maxSupportedTransactionVersion: 0` fails on v1 with error -32015, which is why `fetchTransaction` retries with the version the RPC names (on by default, `autoVersion: false` turns it off). v1 transactions carry their budget in `message.transactionConfig` (`computeUnitLimit`, `priorityFee` in lamports) and have no Compute Budget instructions; the parser reads that.
 
