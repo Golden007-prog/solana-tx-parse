@@ -116,6 +116,7 @@ export interface ParsedTransaction {
     priorityLamports: number;
     /** What the compute-budget settings ask for; null when unknown. */
     priorityLamportsDeclared: number | null;
+    /** Number of transaction signatures. Base fees additionally include Ed25519 and secp256k1 precompile verifications. */
     signatures: number;
   };
   computeUnits: { consumed: number | null; limit: number | null; limitSource: "instruction" | "default" | "transactionConfig"; priceMicroLamports: number | null };

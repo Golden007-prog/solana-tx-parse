@@ -70,7 +70,7 @@ The multi-line text the CLI prints. Lists are capped at `maxRows`. When some swa
 | `status` | `"success"` or `"failed"`. |
 | `error` | `null`, or `{ raw, message, instructionIndex, programId, program, customCode, log }`. `raw` is `meta.err` as the RPC sent it; `log` is the program's own error line (Anchor's `Error Message:`, `Program log: Error…`, or the runtime's `Program X failed: …`). |
 | `feePayer`, `signers` | |
-| `fee` | `{ lamports, sol, baseLamports, priorityLamports, priorityLamportsDeclared, signatures }`. `priorityLamports` = fee − base (the real charge); `priorityLamportsDeclared` is what the budget settings ask for. |
+| `fee` | `{ lamports, sol, baseLamports, priorityLamports, priorityLamportsDeclared, signatures }`. The base fee counts transaction signatures and Ed25519 and secp256k1 precompile verifications. `signatures` counts transaction signatures only. `priorityLamports` = fee − base (the real charge); `priorityLamportsDeclared` comes from the budget settings. |
 | `computeUnits` | `{ consumed, limit, limitSource, priceMicroLamports }`. `limitSource` is `"instruction"`, `"default"` (no `SetComputeUnitLimit`; worked out from the runtime's rule) or `"transactionConfig"` (v1). |
 | `computeBudget` | `{ source: "instructions" \| "transactionConfig", unitLimit, unitPriceMicroLamports, priorityFeeLamports, heapFrameBytes, loadedAccountsDataSizeLimit, effectiveUnitLimit, unitLimitSource }`. For v1, `priorityFeeLamports` is the config's `priorityFee` and there is no per-unit price. |
 | `accounts` | `{ total, fromLookupTables, lookupTables }`: `lookupTables` are the table addresses from `addressTableLookups`. |

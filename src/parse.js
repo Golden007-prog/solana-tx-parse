@@ -8,6 +8,10 @@ export const SOL = "SOL";
 /** Lamports charged per signature (the base fee on mainnet). */
 export const LAMPORTS_PER_SIGNATURE = 5000;
 const MAX_COMPUTE_UNIT_LIMIT = 1_400_000;
+const SIGNATURE_PRECOMPILES = new Set([
+  "Ed25519SigVerify111111111111111111111111111",
+  "KeccakSecp256k11111111111111111111111111111",
+]);
 
 // Programs the runtime treats as builtins: an instruction to one of these gets a default budget of 3,000 compute
 // units instead of 200,000 when the transaction does not set its own limit.
@@ -113,7 +117,13 @@ export function decodeComputeBudget(instructions) {
 function feeBreakdown(tx, instructions) {
   const fee = Number(tx.meta?.fee ?? 0);
   const signatures = (tx.transaction.signatures || []).length || 1;
-  const base = signatures * LAMPORTS_PER_SIGNATURE;
+  let precompileSignatures = 0;
+  for (const ix of instructions) {
+    if (ix.inner || !SIGNATURE_PRECOMPILES.has(ix.programId)) continue;
+    // Both precompiles store the number of verifications in the first byte.
+    precompileSignatures += dataBytes(ix)?.[0] ?? 0;
+  }
+  const base = (signatures + precompileSignatures) * LAMPORTS_PER_SIGNATURE;
   const fees = (priorityDeclared) => ({
     lamports: fee, sol: ui(fee, 9),
     baseLamports: Math.min(base, fee),

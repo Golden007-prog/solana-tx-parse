@@ -34,6 +34,21 @@ test("plain SOL transfer: fee, default compute limit, one transfer, no swap", ()
   assert.deepEqual(p.tokenChanges, []);
 });
 
+test("base fees include verified signatures from both precompile programs", () => {
+  // Finalized getTransaction results from the public mainnet RPC. See VERIFY.md for signatures.
+  for (const [fixture, signatures, base, priority] of [
+    ["ed25519-precompile", 1, 10000, 1170],
+    ["secp256k1-precompile", 2, 15000, 3414],
+  ]) {
+    const { fee } = parseFetchedTransaction(load(fixture));
+    assert.equal(fee.signatures, signatures, fixture);
+    assert.equal(fee.baseLamports, base, fixture);
+    assert.equal(fee.priorityLamports, priority, fixture);
+    assert.equal(fee.priorityLamportsDeclared, priority, fixture);
+    assert.equal(fee.lamports, base + priority, fixture);
+  }
+});
+
 test("SPL transfer: transferChecked decoded, token changes grouped by owner and mint", () => {
   const p = parseFetchedTransaction(load("spl-transfer"));
   assert.equal(p.computeUnits.limit, 203000, "Token (200,000) + Compute Budget (3,000); the logs say 'of 203000'");
