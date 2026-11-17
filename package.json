@@ -1,0 +1,19 @@
+{
+  "name": "solana-tx-parse",
+  "version": "1.0.0",
+  "description": "Turn a Solana transaction signature into a readable summary: fee and priority fee, status and error, programs invoked by name, balance changes per owner, SOL and SPL transfers, swaps. Zero dependencies. By Blix.",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "index.d.ts",
+  "exports": { ".": { "types": "./index.d.ts", "default": "./src/index.js" } },
+  "bin": { "solana-tx-parse": "bin/cli.js" },
+  "files": ["src", "bin", "index.d.ts", "README.md", "LICENSE", "CHANGELOG.md"],
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=20" },
+  "keywords": ["solana", "transaction", "parser", "getTransaction", "priority-fee", "compute-budget", "swap", "jupiter", "pump.fun", "raydium", "spl-token", "address-lookup-table", "blix"],
+  "author": "Blix (https://blixvip.com)",
+  "license": "MIT",
+  "homepage": "https://blixvip.com",
+  "repository": { "type": "git", "url": "git+https://github.com/blixvip/solana-tx-parse.git" },
+  "bugs": { "url": "https://github.com/blixvip/solana-tx-parse/issues" }
+}
