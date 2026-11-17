@@ -1,0 +1,33 @@
+name: Bug report
+description: Something does not work as documented
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran and what you got. Paste the full error.
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduce
+      description: Command or code, plus the mint, address or signature involved (these are public). Never paste an RPC URL that contains your API key.
+      render: js
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Package version or commit, and `node --version`
+    validations: { required: true }
+  - type: input
+    id: rpc
+    attributes:
+      label: RPC provider
+      description: e.g. public mainnet, Helius free, QuickNode. Provider name only.

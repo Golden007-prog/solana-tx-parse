@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and ideas (Discord)
+    url: https://discord.gg/grokbot
+    about: Ask how something works or run an idea past the maintainers.
+  - name: Security report
+    url: https://github.com/blixvip/solana-tx-parse/security/advisories/new
+    about: Report a vulnerability privately.

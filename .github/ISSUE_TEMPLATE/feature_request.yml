@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest something new
+labels: ["feature request"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and why is it hard today?
+    validations: { required: true }
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposed solution
+      description: API sketch, CLI flag, or output you want.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contributing
+      options:
+        - label: I would like to build this myself
