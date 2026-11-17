@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>solana-tx-parse: Parse any Solana transaction in Node.js | Blix open source</title>
+<meta name="description" content="Turn a Solana transaction signature into a readable summary: fee and priority fee, status and error in words, programs by name, balance changes per wallet, SOL and SPL transfers, swaps. v0 and v1 transactions. Zero dependencies.">
+<meta name="keywords" content="Solana transaction parser, parse Solana transaction, getTransaction, Solana priority fee, Solana transaction Node.js, decode Solana transaction">
+<link rel="canonical" href="https://blixvip.github.io/solana-tx-parse/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="solana-tx-parse: Parse any Solana transaction in Node.js">
+<meta property="og:description" content="Turn a Solana transaction signature into a readable summary: fee and priority fee, status and error in words, programs by name, balance changes per wallet, SOL and SPL transfers, swaps. Zero dependencies.">
+<meta property="og:url" content="https://blixvip.github.io/solana-tx-parse/">
+<meta property="og:image" content="https://raw.githubusercontent.com/blixvip/solana-tx-parse/main/assets/blix-hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://raw.githubusercontent.com/blixvip/sol-holders/main/assets/blix-icon.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"solana-tx-parse","description":"Turn a Solana transaction signature into a readable summary: fee and priority fee, status and error in words, programs by name, balance changes per wallet, SOL and SPL transfers, swaps. v0 and v1 transactions. Zero dependencies.","codeRepository":"https://github.com/blixvip/solana-tx-parse","programmingLanguage":"JavaScript","runtimePlatform":"Node.js 20+","license":"https://opensource.org/licenses/MIT","url":"https://blixvip.github.io/solana-tx-parse/","author":{"@type":"Organization","name":"Blix","url":"https://blixvip.com"}}</script>
+<style>
+:root{color-scheme:dark;--bg:#0a0a0b;--panel:#141416;--line:#26262a;--ink:#f3f3f5;--muted:#a0a0a8;--accent:#8fb4ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+main{max-width:860px;margin:0 auto;padding:32px 16px 64px}
+nav{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:14px;margin-bottom:36px}nav .brand{font-weight:700;color:var(--ink);margin-right:auto}
+h1{font-size:clamp(30px,6vw,46px);line-height:1.1;margin:0 0 6px;letter-spacing:-.02em}h2{font-size:20px;margin:40px 0 12px}
+.tag{color:var(--muted);font-size:clamp(17px,3vw,21px);margin:0 0 20px}.lead{font-size:18px;margin:0 0 24px}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px}.btn{display:inline-block;padding:10px 18px;border-radius:999px;border:1px solid var(--line);color:var(--ink);font-weight:600}.btn.main{background:var(--ink);color:#000;border-color:var(--ink)}.btn:hover{text-decoration:none;opacity:.9}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:0 0 14px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+ul{padding-left:20px;margin:0}li{margin:6px 0}
+.hero{display:block;margin:28px 0 8px}.hero img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:var(--ink)}.card:hover{text-decoration:none;border-color:#3a3a40}.card b{display:block;margin-bottom:4px}.card span{color:var(--muted);font-size:14px}
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<nav><a class="brand" href="https://blixvip.github.io/">BLIX open source</a><a href="https://github.com/blixvip/solana-tx-parse">GitHub</a><a href="https://github.com/blixvip/solana-tx-parse/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22">Good first issues</a><a href="https://github.com/blixvip/solana-tx-parse/discussions">Discussions</a><a href="https://discord.gg/grokbot">Discord</a><a href="https://blixvip.com">blixvip.com</a></nav>
+<h1>solana-tx-parse</h1>
+<p class="tag">Any Solana transaction, in words</p>
+<p class="lead">Give it a signature and get back who paid, what it cost (base and priority fee), whether it failed and why, which programs ran, whose balances moved, the SOL and SPL transfers, and the swaps. Legacy, v0 (address lookup tables) and v1 transactions. Zero dependencies, any RPC.</p>
+<div class="cta"><a class="btn main" href="https://github.com/blixvip/solana-tx-parse">View on GitHub</a><a class="btn" href="https://blixvip.com">Start trading at blixvip.com</a><a class="btn" href="https://discord.gg/grokbot">Join the Discord</a></div>
+<h2>Try it</h2>
+<pre><code>npx github:blixvip/solana-tx-parse x2nTgvSFFneAKW5W5mHcfMYhzen5o7Lfb1pBmepDQQDJZ4ud2Z7QpDxdYVVTVMDqG2e5TJ1qAA8zGDPAxdpudKR</code></pre>
+<pre><code>Signature  x2nTgvSFFneAKW5W5mHcfMYhzen5o7Lfb1pBmepDQQDJZ4ud2Z7QpDxdYVVTVMDqG2e5TJ1qAA8zGDPAxdpudKR
+Status     success
+Slot       470,678,784 · 2026-11-17 21:08:28 UTC · version legacy
+Fee payer  H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS
+Fee        0.0001065 SOL (106,500 lamports: base 5,000 + priority 101,500)
+Compute    255 CU used of 203,000 (default limit) @ 500,000 micro-lamports/CU
+Programs   Token Program, Compute Budget
+
+Balance changes
+  H8sM…3WjS  -0.0001065 SOL (includes the fee)
+  H8sM…3WjS  -37.742077 EPjF…Dt1v
+  3vKW…AxbM  +37.742077 EPjF…Dt1v
+
+Transfers
+  H8sM…3WjS → 3vKW…AxbM  37.742077 EPjF…Dt1v</code></pre>
+<p>Add <code>--json</code> for the full result and <code>--rpc &lt;url&gt;</code> (or <code>SOLANA_RPC_URL</code>) for your own endpoint.</p>
+<h2>What it does</h2>
+<ul><li>Fee split into base and priority, plus the priority fee the Compute Budget instructions ask for</li><li>Failures in words: <code>instruction 2 (Raydium CLMM) failed: custom program error 6001 (0x1771)</code></li><li>18 well-known programs named: Jupiter, Raydium, Orca, Meteora, pump.fun, PumpSwap and more</li><li>SOL and token balance changes per wallet, exact amounts as strings</li><li>SOL and SPL transfers, Token and Token-2022, with the owning wallets resolved</li><li>Swaps from balance deltas, for any DEX</li><li>Address lookup tables merged; v1 transactions fetched with the version the RPC asks for</li></ul>
+<h2>Use it in your code</h2>
+<pre><code>npm install github:blixvip/solana-tx-parse</code></pre>
+<pre><code>import { parseTransaction } from "solana-tx-parse";
+
+const tx = await parseTransaction("x2nTgvSFFneAKW5W5mHcfMYhzen5o7Lfb1pBmepDQQDJZ4ud2Z7QpDxdYVVTVMDqG2e5TJ1qAA8zGDPAxdpudKR");
+
+console.log(tx.status, tx.feePayer);
+console.log(tx.fee.lamports, tx.fee.baseLamports, tx.fee.priorityLamports);
+for (const t of tx.transfers) console.log(t.fromOwner, "->", t.toOwner, t.amount, t.mint);</code></pre>
+<p>Already have the transaction from a websocket or your own client? <code>parseFetchedTransaction(tx)</code> parses it synchronously with no network. Full documentation and every result field are in the <a href="https://github.com/blixvip/solana-tx-parse#readme">README</a> and <a href="https://github.com/blixvip/solana-tx-parse/blob/main/docs/API.md">API reference</a>. MIT licensed, no dependencies.</p>
+<h2>Integrations</h2>
+<ul><li><a href="https://github.com/blixvip/solana-tx-parse/tree/main/examples/integrations/http-endpoint">A JSON endpoint</a>: <code>GET /tx/&lt;signature&gt;</code> with <code>node:http</code>, no framework</li><li><a href="https://github.com/blixvip/solana-tx-parse/tree/main/examples/integrations/discord-webhook">A Discord webhook alert</a>: post a transaction summary to a channel</li></ul>
+<a class="hero" href="https://blixvip.com"><img src="https://raw.githubusercontent.com/blixvip/solana-tx-parse/main/assets/blix-hero.jpg" alt="BLIX: AI-powered Solana memecoin terminal. Trade memes first." width="1600" height="900" loading="lazy"></a>
+<h2>Guides</h2>
+<p><a href="parse-solana-transaction-nodejs-without-web3js.html">How to parse a Solana transaction in Node.js without web3.js</a></p>
+<p><a href="solana-transaction-priority-fee.html">How to see the priority fee a Solana transaction paid</a></p>
+<h2>From the team behind Blix</h2>
+<p>solana-tx-parse is a small, open piece of what runs behind <a href="https://blixvip.com">Blix</a>, the AI-powered Solana memecoin terminal with 0% fees: every pump.fun launch live, AI coin ratings, narratives, wallet and X tracking, and one-click trading. If you want the result rather than the plumbing, <a href="https://blixvip.com">use Blix</a>. There is also a <a href="https://blixvip.com/api">public API</a> and an <a href="https://blixvip.com/mcp">MCP server</a> for AI agents.</p>
+<h2>Contribute</h2>
+<p>Pull requests are welcome and there are <a href="https://github.com/blixvip/solana-tx-parse/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22">good first issues</a> with step-by-step instructions. Setup is <code>git clone</code> and <code>npm test</code>, fully offline. Ask anything in <a href="https://github.com/blixvip/solana-tx-parse/discussions">Discussions</a> or the <a href="https://discord.gg/grokbot">Discord</a>.</p>
+<h2>More Solana tools from Blix</h2>
+<div class="grid"><a class="card" href="https://blixvip.github.io/solana-token-meta/"><b>solana-token-meta</b><span>Token metadata and rug check: authorities, extensions, name and symbol</span></a><a class="card" href="https://blixvip.github.io/solana-swap-parser/"><b>solana-swap-parser</b><span>What a Solana transaction traded: wallet, sold, bought, price, DEX</span></a><a class="card" href="https://blixvip.github.io/sol-holders/"><b>sol-holders</b><span>Top holders of any Solana token, pools and curves left out</span></a><a class="card" href="https://blixvip.github.io/solana-rpc-pool/"><b>solana-rpc-pool</b><span>A Solana RPC load balancer: several endpoints, rate limits, failover</span></a><a class="card" href="https://blixvip.github.io/pump-curve/"><b>pump-curve</b><span>Read a pump.fun bonding curve: price, market cap, progress, migration</span></a></div>
+<footer>MIT licensed. Made by <a href="https://blixvip.com">Blix</a>. <a href="https://github.com/blixvip">github.com/blixvip</a> · <a href="https://discord.gg/grokbot">discord.gg/grokbot</a></footer>
+</main>
+</body>
+</html>

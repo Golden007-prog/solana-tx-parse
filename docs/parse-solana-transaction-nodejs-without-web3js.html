@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to parse a Solana transaction in Node.js without web3.js | Blix open source</title>
+<meta name="description" content="Fetch a Solana transaction with one getTransaction call and plain fetch, then read the fee payer, status, fee, SOL and token balance changes per wallet. Node 20, no @solana/web3.js, no dependencies.">
+<link rel="canonical" href="https://blixvip.github.io/solana-tx-parse/parse-solana-transaction-nodejs-without-web3js.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to parse a Solana transaction in Node.js without web3.js">
+<meta property="og:description" content="Fetch a Solana transaction with one getTransaction call and plain fetch, then read the fee payer, status, fee, SOL and token balance changes per wallet. No dependencies.">
+<meta property="og:url" content="https://blixvip.github.io/solana-tx-parse/parse-solana-transaction-nodejs-without-web3js.html">
+<meta property="og:image" content="https://raw.githubusercontent.com/blixvip/solana-tx-parse/main/assets/blix-hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://raw.githubusercontent.com/blixvip/sol-holders/main/assets/blix-icon.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How to parse a Solana transaction in Node.js without web3.js","description":"Fetch a Solana transaction with one getTransaction call and plain fetch, then read the fee payer, status, fee, SOL and token balance changes per wallet. Node 20, no @solana/web3.js, no dependencies.","url":"https://blixvip.github.io/solana-tx-parse/parse-solana-transaction-nodejs-without-web3js.html","datePublished":"2026-11-17","dateModified":"2026-11-17","proficiencyLevel":"Beginner","dependencies":"Node.js 20+","author":{"@type":"Organization","name":"Blix","url":"https://blixvip.com"},"publisher":{"@type":"Organization","name":"Blix","url":"https://blixvip.com"}}</script>
+<style>:root{color-scheme:dark;--bg:#0a0a0b;--panel:#141416;--line:#26262a;--ink:#f3f3f5;--muted:#a0a0a8;--accent:#8fb4ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+main{max-width:780px;margin:0 auto;padding:32px 16px 64px}
+nav{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:14px;margin-bottom:36px}nav .brand{font-weight:700;color:var(--ink);margin-right:auto}
+h1{font-size:clamp(28px,5.5vw,40px);line-height:1.15;margin:0 0 12px;letter-spacing:-.02em}h2{font-size:22px;margin:40px 0 12px}h3{font-size:18px;margin:28px 0 8px}
+.lead{font-size:19px;color:var(--muted);margin:0 0 28px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:0 0 16px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}p code,li code,td code{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.wrap{overflow-x:auto;margin:0 0 16px}table{border-collapse:collapse;width:100%;font-size:15px}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--panel)}
+ul,ol{padding-left:22px}li{margin:6px 0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:32px 0}.box h2{margin-top:0}
+.btn{display:inline-block;padding:10px 18px;border-radius:999px;border:1px solid var(--line);color:var(--ink);font-weight:600;margin:4px 8px 4px 0}.btn.main{background:var(--ink);color:#000;border-color:var(--ink)}.btn:hover{text-decoration:none;opacity:.9}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:var(--ink)}.card:hover{text-decoration:none;border-color:#3a3a40}.card b{display:block;margin-bottom:4px}.card span{color:var(--muted);font-size:14px}
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}</style>
+</head>
+<body>
+<main>
+<nav><a class="brand" href="https://blixvip.github.io/">BLIX open source</a><a href="https://blixvip.github.io/solana-tx-parse/">solana-tx-parse</a><a href="https://github.com/blixvip/solana-tx-parse">GitHub</a><a href="https://discord.gg/grokbot">Discord</a><a href="https://blixvip.com">blixvip.com</a></nav>
+<article>
+<h1>How to parse a Solana transaction in Node.js without web3.js</h1>
+<p class="lead">You do not need <code>@solana/web3.js</code> (or any package) to read a Solana transaction. Node 20 has <code>fetch</code>, and the RPC already returns most of the answer as JSON. Here is the one call, the three fields that matter, and the traps that make a quick script wrong.</p>
+<h2>The one RPC call</h2>
+<p><code>getTransaction</code> with two options you almost always want:</p>
+<ul>
+<li><code>encoding: "jsonParsed"</code>: the RPC decodes System and SPL Token instructions for you, and gives every account key with its <code>signer</code> and <code>writable</code> flags.</li>
+<li><code>maxSupportedTransactionVersion: 0</code>: without it, any v0 transaction (most swaps today) is refused with an error instead of returned.</li>
+</ul>
+<h2>Working code, zero dependencies</h2>
+<p>Save as <code>parse-tx.mjs</code> and run <code>node parse-tx.mjs</code>. It uses the free public mainnet RPC unless you set <code>SOLANA_RPC_URL</code>.</p>
+<pre><code>// parse-tx.mjs: Node 20+, no dependencies
+const RPC = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
+const signature = "x2nTgvSFFneAKW5W5mHcfMYhzen5o7Lfb1pBmepDQQDJZ4ud2Z7QpDxdYVVTVMDqG2e5TJ1qAA8zGDPAxdpudKR";
+
+const res = await fetch(RPC, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    jsonrpc: "2.0", id: 1, method: "getTransaction",
+    params: [signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0, commitment: "confirmed" }],
+  }),
+});
+const { result: tx, error } = await res.json();
+if (error) throw new Error(`RPC error ${error.code}: ${error.message}`);
+if (!tx) throw new Error("transaction not found");
+
+const keys = tx.transaction.message.accountKeys.map((k) =&gt; k.pubkey);
+console.log("fee payer:", keys[0]);
+console.log("status:   ", tx.meta.err ? JSON.stringify(tx.meta.err) : "success");
+console.log("fee:      ", tx.meta.fee, "lamports");
+
+// SOL that moved, per address
+tx.meta.preBalances.forEach((pre, i) =&gt; {
+  const change = tx.meta.postBalances[i] - pre;
+  if (change) console.log("SOL  ", keys[i], change / 1e9);
+});
+
+// Tokens that moved, per owner wallet (not per token account)
+const tokens = new Map();
+for (const [list, sign] of [[tx.meta.preTokenBalances, -1n], [tx.meta.postTokenBalances, 1n]]) {
+  for (const b of list) {
+    const k = `${b.owner} ${b.mint}`;
+    const e = tokens.get(k) ?? { raw: 0n, decimals: b.uiTokenAmount.decimals };
+    e.raw += sign * BigInt(b.uiTokenAmount.amount);
+    tokens.set(k, e);
+  }
+}
+for (const [k, { raw, decimals }] of tokens) if (raw) console.log("TOKEN", k, Number(raw) / 10 ** decimals);</code></pre>
+<p>Output, for a USDC transfer on mainnet:</p>
+<pre><code>fee payer: H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS
+status:    success
+fee:       106500 lamports
+SOL   H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS -0.0001065
+TOKEN H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v -37.742077
+TOKEN 3vKWT4RcdQUx63gfU6dyTGf1fDpoJrQ8PSuHUbF2AxbM EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v 37.742077</code></pre>
+<h2>What each part is doing</h2>
+<h3>The fee payer is account 0</h3>
+<p>The first entry of <code>accountKeys</code> always signs and always pays the fee. <code>meta.fee</code> is the whole fee in lamports (1 SOL = 1,000,000,000 lamports), base and priority together.</p>
+<h3>SOL changes come from two parallel arrays</h3>
+<p><code>meta.preBalances[i]</code> and <code>meta.postBalances[i]</code> are the lamports of <code>accountKeys[i]</code> before and after. The fee payer's change includes the fee, which is why the sender above lost 0.0001065 SOL in a transaction that moved no SOL at all.</p>
+<h3>Token changes are per token account, so group by owner</h3>
+<p><code>preTokenBalances</code> and <code>postTokenBalances</code> list token <em>accounts</em>, each with its <code>owner</code> (the wallet) and <code>mint</code>. One wallet can hold the same token in several accounts, and an account can be created or closed in the same transaction, so it may appear in only one of the two lists. Summing pre as negative and post as positive per owner and mint handles all of that. Use <code>BigInt</code> on <code>uiTokenAmount.amount</code>: token amounts often exceed what a JavaScript number holds exactly.</p>
+<h2>Three traps</h2>
+<ol>
+<li><strong>v1 transactions.</strong> Newer transactions can be version 1. With <code>maxSupportedTransactionVersion: 0</code> the RPC answers error <code>-32015</code>, "Transaction version (1) is not supported by the requesting client", and names the version to ask for. Retry with that number.</li>
+<li><strong>Lookup tables with <code>json</code> encoding.</strong> If you fetch with <code>encoding: "json"</code> instead, a v0 transaction's addresses from lookup tables are <em>not</em> in <code>accountKeys</code>; they are in <code>meta.loadedAddresses</code> (writable first, then read-only) and must be appended, or every balance index after them points at the wrong address. <code>jsonParsed</code> merges them for you.</li>
+<li><strong>Failed transactions still cost a fee.</strong> <code>meta.err</code> is not null, the instructions were rolled back, but the fee was charged. Do not report the transfers in the instructions as having happened.</li>
+</ol>
+<h2>The same thing, finished</h2>
+<p>Once you also want the priority fee split out, errors in words, programs named, SOL and SPL transfers with their wallets, and swaps, the script grows into a few hundred lines. <a href="https://github.com/blixvip/solana-tx-parse">solana-tx-parse</a> is those lines, MIT licensed and still dependency-free:</p>
+<pre><code>npm install github:blixvip/solana-tx-parse</code></pre>
+<pre><code>import { parseTransaction } from "solana-tx-parse";
+
+const tx = await parseTransaction("x2nTgvSFFneAKW5W5mHcfMYhzen5o7Lfb1pBmepDQQDJZ4ud2Z7QpDxdYVVTVMDqG2e5TJ1qAA8zGDPAxdpudKR");
+
+console.log(tx.status, tx.feePayer);
+console.log(tx.fee.lamports, tx.fee.baseLamports, tx.fee.priorityLamports);
+for (const t of tx.transfers) console.log(t.fromOwner, "-&gt;", t.toOwner, t.amount, t.mint);
+console.log(tx.programs.map((p) =&gt; p.label || p.programId));</code></pre>
+<pre><code>success H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS
+106500 5000 101500
+H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS -&gt; 3vKWT4RcdQUx63gfU6dyTGf1fDpoJrQ8PSuHUbF2AxbM 37.742077 EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+[ 'Token Program', 'Compute Budget' ]</code></pre>
+<p>It retries v1 transactions with the right version, merges lookup tables for any encoding, and if you already have the transaction from a websocket, <code>parseFetchedTransaction(tx)</code> parses it with no network call. Or from a terminal: <code>npx github:blixvip/solana-tx-parse &lt;signature&gt;</code>.</p>
+<h2>Limits to know</h2>
+<ul>
+<li><strong>The public RPC rate limits.</strong> A few requests in a row and you get HTTP 429. For more, use the free tier of any RPC provider through <code>SOLANA_RPC_URL</code>.</li>
+<li><strong>Instruction arguments are not decoded here.</strong> Balance changes tell you what moved, not which Jupiter route or which Raydium pool instruction did it. That needs the program's IDL.</li>
+</ul>
+</article>
+<div class="box"><h2>Want it done for you?</h2>
+<p>This is the small, open version. <a href="https://blixvip.com">Blix</a> is the AI-powered Solana memecoin terminal it comes from: every pump.fun launch live, AI coin ratings, narratives, wallet and X tracking, and one-click trading with 0% fees. There is a <a href="https://blixvip.com/api">public API</a> and an <a href="https://blixvip.com/mcp">MCP server</a> too.</p>
+<p><a class="btn main" href="https://blixvip.com">Start trading at blixvip.com</a><a class="btn" href="https://discord.gg/grokbot">Join the Discord</a></p></div>
+<h2>Help build it</h2>
+<p>solana-tx-parse is open source and takes pull requests. There are <a href="https://github.com/blixvip/solana-tx-parse/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22">good first issues</a> with step-by-step instructions, and setup is <code>git clone</code> and <code>npm test</code>.</p>
+<h2>More guides</h2>
+<div class="grid"><a class="card" href="solana-transaction-priority-fee.html"><b>How to see the priority fee a Solana transaction paid</b><span>solana-tx-parse</span></a><a class="card" href="https://blixvip.github.io/solana-token-meta/check-solana-token-mint-authority-revoked.html"><b>How to check if a Solana token's mint authority is revoked</b><span>solana-token-meta</span></a><a class="card" href="https://blixvip.github.io/solana-swap-parser/parse-solana-swap-transaction-any-dex.html"><b>How to parse a Solana swap transaction for any DEX</b><span>solana-swap-parser</span></a><a class="card" href="https://blixvip.github.io/solana-rpc-pool/fix-solana-rpc-429-too-many-requests.html"><b>How to stop Solana RPC 429 errors (Too Many Requests)</b><span>solana-rpc-pool</span></a></div>
+<footer>Written by the <a href="https://blixvip.com">Blix</a> team. Code is MIT licensed. <a href="https://github.com/blixvip">github.com/blixvip</a> · <a href="https://discord.gg/grokbot">discord.gg/grokbot</a> · <a href="https://blixvip.github.io/">All tools and guides</a></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to see the priority fee a Solana transaction paid | Blix open source</title>
+<meta name="description" content="Split a Solana transaction's fee into the base fee and the priority fee, decode SetComputeUnitPrice and SetComputeUnitLimit from the Compute Budget instructions, and see why a transaction with no limit set overpays. Runnable Node.js code.">
+<link rel="canonical" href="https://blixvip.github.io/solana-tx-parse/solana-transaction-priority-fee.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to see the priority fee a Solana transaction paid">
+<meta property="og:description" content="Split a Solana transaction's fee into base and priority, decode the Compute Budget instructions, and see why a transaction with no limit set overpays. Runnable Node.js code.">
+<meta property="og:url" content="https://blixvip.github.io/solana-tx-parse/solana-transaction-priority-fee.html">
+<meta property="og:image" content="https://raw.githubusercontent.com/blixvip/solana-tx-parse/main/assets/blix-hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://raw.githubusercontent.com/blixvip/sol-holders/main/assets/blix-icon.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How to see the priority fee a Solana transaction paid","description":"Split a Solana transaction's fee into the base fee and the priority fee, decode SetComputeUnitPrice and SetComputeUnitLimit from the Compute Budget instructions, and see why a transaction with no limit set overpays. Runnable Node.js code.","url":"https://blixvip.github.io/solana-tx-parse/solana-transaction-priority-fee.html","datePublished":"2026-11-17","dateModified":"2026-11-17","proficiencyLevel":"Beginner","dependencies":"Node.js 20+","author":{"@type":"Organization","name":"Blix","url":"https://blixvip.com"},"publisher":{"@type":"Organization","name":"Blix","url":"https://blixvip.com"}}</script>
+<style>:root{color-scheme:dark;--bg:#0a0a0b;--panel:#141416;--line:#26262a;--ink:#f3f3f5;--muted:#a0a0a8;--accent:#8fb4ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+main{max-width:780px;margin:0 auto;padding:32px 16px 64px}
+nav{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:14px;margin-bottom:36px}nav .brand{font-weight:700;color:var(--ink);margin-right:auto}
+h1{font-size:clamp(28px,5.5vw,40px);line-height:1.15;margin:0 0 12px;letter-spacing:-.02em}h2{font-size:22px;margin:40px 0 12px}h3{font-size:18px;margin:28px 0 8px}
+.lead{font-size:19px;color:var(--muted);margin:0 0 28px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:0 0 16px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}p code,li code,td code{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.wrap{overflow-x:auto;margin:0 0 16px}table{border-collapse:collapse;width:100%;font-size:15px}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--panel)}
+ul,ol{padding-left:22px}li{margin:6px 0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:32px 0}.box h2{margin-top:0}
+.btn{display:inline-block;padding:10px 18px;border-radius:999px;border:1px solid var(--line);color:var(--ink);font-weight:600;margin:4px 8px 4px 0}.btn.main{background:var(--ink);color:#000;border-color:var(--ink)}.btn:hover{text-decoration:none;opacity:.9}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:var(--ink)}.card:hover{text-decoration:none;border-color:#3a3a40}.card b{display:block;margin-bottom:4px}.card span{color:var(--muted);font-size:14px}
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}</style>
+</head>
+<body>
+<main>
+<nav><a class="brand" href="https://blixvip.github.io/">BLIX open source</a><a href="https://blixvip.github.io/solana-tx-parse/">solana-tx-parse</a><a href="https://github.com/blixvip/solana-tx-parse">GitHub</a><a href="https://discord.gg/grokbot">Discord</a><a href="https://blixvip.com">blixvip.com</a></nav>
+<article>
+<h1>How to see the priority fee a Solana transaction paid</h1>
+<p class="lead">A Solana transaction's fee is one number, <code>meta.fee</code>, with the priority fee hidden inside it. The price per compute unit sits in a base58 instruction the RPC does not decode. Here is how to split the fee, read what the sender asked for, and check the two agree.</p>
+<h2>The formula</h2>
+<ul>
+<li><strong>Base fee</strong> = 5,000 lamports × number of signatures.</li>
+<li><strong>Priority fee</strong> = <code>meta.fee</code> − base fee.</li>
+<li>What the sender <em>asked</em> for = ceil(compute-unit price × compute-unit limit ÷ 1,000,000). The price is in micro-lamports per compute unit and comes from <code>SetComputeUnitPrice</code>; the limit comes from <code>SetComputeUnitLimit</code>.</li>
+</ul>
+<p>Note the limit, not the units used. You pay for the compute you reserve.</p>
+<h2>The Compute Budget instructions</h2>
+<p>They are instructions to <code>ComputeBudget111111111111111111111111111111</code>. The first byte of the data says which one; the rest is a little-endian integer:</p>
+<div class="wrap"><table><tr><th>First byte</th><th>Instruction</th><th>Value</th></tr>
+<tr><td>2</td><td>SetComputeUnitLimit</td><td>u32, compute units</td></tr>
+<tr><td>3</td><td>SetComputeUnitPrice</td><td>u64, micro-lamports per compute unit</td></tr>
+<tr><td>1</td><td>RequestHeapFrame</td><td>u32, bytes</td></tr>
+<tr><td>4</td><td>SetLoadedAccountsDataSizeLimit</td><td>u32, bytes</td></tr></table></div>
+<p>With no <code>SetComputeUnitLimit</code>, the runtime uses a default: 200,000 compute units per top-level instruction, 3,000 for builtin programs such as System and Compute Budget, capped at 1,400,000.</p>
+<h2>Working code, zero dependencies</h2>
+<p>Save as <code>priority-fee.mjs</code> and run <code>node priority-fee.mjs [signature]</code>. Node 20+, the free public mainnet RPC unless you set <code>SOLANA_RPC_URL</code>.</p>
+<pre><code>// priority-fee.mjs: node priority-fee.mjs [signature]. Node 20+, no dependencies
+const RPC = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
+const signature = process.argv[2] ?? "x2nTgvSFFneAKW5W5mHcfMYhzen5o7Lfb1pBmepDQQDJZ4ud2Z7QpDxdYVVTVMDqG2e5TJ1qAA8zGDPAxdpudKR";
+const COMPUTE_BUDGET = "ComputeBudget111111111111111111111111111111";
+
+// Instruction data is base58. A few lines decode it.
+const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+function base58(s) {
+  let n = 0n;
+  for (const c of s) n = n * 58n + BigInt(ALPHABET.indexOf(c));
+  const out = [];
+  while (n &gt; 0n) { out.unshift(Number(n &amp; 255n)); n &gt;&gt;= 8n; }
+  for (const c of s) { if (c !== "1") break; out.unshift(0); }
+  return Uint8Array.from(out);
+}
+const readLE = (b, at, len) =&gt; { let v = 0n; for (let i = len - 1; i &gt;= 0; i--) v = (v &lt;&lt; 8n) | BigInt(b[at + i]); return v; };
+
+const res = await fetch(RPC, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getTransaction",
+    params: [signature, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 }] }),
+});
+const { result: tx } = await res.json();
+
+// 1. What it paid: total fee minus 5,000 lamports per signature
+const fee = tx.meta.fee;
+const base = 5000 * tx.transaction.signatures.length;
+console.log(`fee ${fee} = base ${base} + priority ${fee - base} lamports`);
+
+// 2. What it asked for: the Compute Budget instructions
+const ixs = tx.transaction.message.instructions;
+let limit = null, price = 0n;
+for (const ix of ixs) {
+  if (ix.programId !== COMPUTE_BUDGET) continue;
+  const b = base58(ix.data);
+  if (b[0] === 2) limit = Number(readLE(b, 1, 4)); // SetComputeUnitLimit(u32)
+  if (b[0] === 3) price = readLE(b, 1, 8);         // SetComputeUnitPrice(u64, micro-lamports per CU)
+}
+// No SetComputeUnitLimit: 200,000 CU per top-level instruction, 3,000 for builtins like Compute Budget and System
+const BUILTINS = new Set([COMPUTE_BUDGET, "11111111111111111111111111111111"]);
+limit ??= Math.min(1_400_000, ixs.reduce((s, ix) =&gt; s + (BUILTINS.has(ix.programId) ? 3000 : 200000), 0));
+const declared = (price * BigInt(limit) + 999_999n) / 1_000_000n; // round up
+console.log(`price ${price} micro-lamports/CU x limit ${limit} CU = ${declared} lamports`);
+console.log(`used ${tx.meta.computeUnitsConsumed} CU`);</code></pre>
+<p>Two real mainnet transactions:</p>
+<pre><code>$ node priority-fee.mjs
+fee 106500 = base 5000 + priority 101500 lamports
+price 500000 micro-lamports/CU x limit 203000 CU = 101500 lamports
+used 255 CU
+
+$ node priority-fee.mjs 2axWwMEc9F41wpeitiAzxfqaByUEQSfX1ghp4AcdFmUXsa69jEYSgRqhhhoUgtMCBGv6sutdAZ6yAfKwKoLXBP1d
+fee 8750 = base 5000 + priority 3750 lamports
+price 25000 micro-lamports/CU x limit 150000 CU = 3750 lamports
+used 83261 CU</code></pre>
+<p>In both, what the transaction paid matches what it asked for to the lamport.</p>
+<h2>Why the first one paid for 800 times the compute it used</h2>
+<p>The first transaction is a plain USDC transfer. It set a price of 500,000 micro-lamports per compute unit but no limit, so it was charged for the default 203,000 units (one token instruction at 200,000 plus the Compute Budget instruction at 3,000). It used 255. A <code>SetComputeUnitLimit</code> of, say, 1,000 would have cut the priority fee from 101,500 lamports to 500.</p>
+<p>The second, a pump.fun buy, did it properly: a limit of 150,000 for 83,261 used, at a low price.</p>
+<p>If you write a wallet or a bot: always set the limit, from a simulation plus a margin. If you analyse transactions: <code>meta.computeUnitsConsumed</code> against the limit is how you spot this.</p>
+<h2>v1 transactions are different</h2>
+<p>Version 1 transactions carry no Compute Budget instructions. Their budget is in <code>message.transactionConfig</code>, and the priority fee there is a total in lamports, not a per-unit price. Ask for them with <code>maxSupportedTransactionVersion: 1</code>; with 0 the RPC refuses with error <code>-32015</code>.</p>
+<h2>The same thing, finished</h2>
+<p><a href="https://github.com/blixvip/solana-tx-parse">solana-tx-parse</a> does all of the above for legacy, v0 and v1 transactions, including the builtin list, the v1 <code>transactionConfig</code> and the version retry, with no dependencies:</p>
+<pre><code>npm install github:blixvip/solana-tx-parse</code></pre>
+<pre><code>import { parseTransaction } from "solana-tx-parse";
+
+const tx = await parseTransaction("x2nTgvSFFneAKW5W5mHcfMYhzen5o7Lfb1pBmepDQQDJZ4ud2Z7QpDxdYVVTVMDqG2e5TJ1qAA8zGDPAxdpudKR");
+console.log(tx.fee);
+console.log(tx.computeUnits);</code></pre>
+<pre><code>{
+  lamports: 106500,
+  sol: 0.0001065,
+  baseLamports: 5000,
+  priorityLamports: 101500,
+  priorityLamportsDeclared: 101500,
+  signatures: 1
+}
+{
+  consumed: 255,
+  limit: 203000,
+  limitSource: 'default',
+  priceMicroLamports: 500000
+}</code></pre>
+<p>Or from a terminal: <code>npx github:blixvip/solana-tx-parse &lt;signature&gt;</code> prints a <code>Fee</code> and a <code>Compute</code> line.</p>
+<h2>Limits to know</h2>
+<ul>
+<li><strong>Precompile signatures.</strong> Signatures verified by the Ed25519 or secp256k1 precompile programs also pay the base fee. The simple formula does not count them, so for those transactions part of the base fee shows up as priority.</li>
+<li><strong>Old transactions.</strong> The default-limit rule above is today's. A transaction from before it may not match; <code>meta.fee</code> minus the base is always the real priority figure.</li>
+<li>To decide what to bid <em>next</em>, look at recent fees instead: <code>getRecentPrioritizationFees</code>.</li>
+</ul>
+</article>
+<div class="box"><h2>Want it done for you?</h2>
+<p>This is the small, open version. <a href="https://blixvip.com">Blix</a> is the AI-powered Solana memecoin terminal it comes from: every pump.fun launch live, AI coin ratings, narratives, wallet and X tracking, and one-click trading with 0% fees. There is a <a href="https://blixvip.com/api">public API</a> and an <a href="https://blixvip.com/mcp">MCP server</a> too.</p>
+<p><a class="btn main" href="https://blixvip.com">Start trading at blixvip.com</a><a class="btn" href="https://discord.gg/grokbot">Join the Discord</a></p></div>
+<h2>Help build it</h2>
+<p>solana-tx-parse is open source and takes pull requests. There are <a href="https://github.com/blixvip/solana-tx-parse/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22">good first issues</a> with step-by-step instructions, and setup is <code>git clone</code> and <code>npm test</code>.</p>
+<h2>More guides</h2>
+<div class="grid"><a class="card" href="parse-solana-transaction-nodejs-without-web3js.html"><b>How to parse a Solana transaction in Node.js without web3.js</b><span>solana-tx-parse</span></a><a class="card" href="https://blixvip.github.io/solana-token-meta/read-token-2022-metadata-javascript.html"><b>How to read Token-2022 metadata in JavaScript</b><span>solana-token-meta</span></a><a class="card" href="https://blixvip.github.io/solana-swap-parser/parse-solana-swap-transaction-any-dex.html"><b>How to parse a Solana swap transaction for any DEX</b><span>solana-swap-parser</span></a><a class="card" href="https://blixvip.github.io/solana-rpc-pool/fix-solana-rpc-429-too-many-requests.html"><b>How to stop Solana RPC 429 errors (Too Many Requests)</b><span>solana-rpc-pool</span></a></div>
+<footer>Written by the <a href="https://blixvip.com">Blix</a> team. Code is MIT licensed. <a href="https://github.com/blixvip">github.com/blixvip</a> · <a href="https://discord.gg/grokbot">discord.gg/grokbot</a> · <a href="https://blixvip.github.io/">All tools and guides</a></footer>
+</main>
+</body>
+</html>
