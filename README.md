@@ -10,7 +10,7 @@
 
 <a href="https://blixvip.com"><img src="assets/blix-hero.jpg" width="100%" alt="BLIX: AI-powered Solana memecoin terminal. Trade memes first."></a>
 
-**[Start trading at blixvip.com →](https://blixvip.com)** &nbsp;·&nbsp; [Public API](https://blixvip.com/api) &nbsp;·&nbsp; [MCP server](https://blixvip.com/mcp) &nbsp;·&nbsp; [Discord](https://discord.gg/grokbot)
+**[Start trading at blixvip.com →](https://blixvip.com)** &nbsp;·&nbsp; [Docs and guides](https://blixvip.github.io/solana-tx-parse/) &nbsp;·&nbsp; [Public API](https://blixvip.com/api) &nbsp;·&nbsp; [MCP server](https://blixvip.com/mcp) &nbsp;·&nbsp; [Discord](https://discord.gg/grokbot)
 
 Built by the team behind **[Blix](https://blixvip.com)**, a Solana memecoin terminal that reads a lot of transactions; this is the small, open part that turns one into a summary.
 
@@ -99,6 +99,15 @@ Already fetched the transaction yourself (a websocket, Geyser, your own RPC clie
 | [`examples/batch.js`](examples/batch.js) | Three signatures, one at a time with a pause, as a public RPC likes it. |
 
 Run any of them with `node examples/<name>.js`. Their real output is in [VERIFY.md](VERIFY.md).
+
+**Integrations** (copy into your project as they are):
+
+| | |
+|---|---|
+| [`examples/integrations/http-endpoint`](examples/integrations/http-endpoint) | `GET /tx/<signature>` JSON API with `node:http`, cached. |
+| [`examples/integrations/discord-webhook`](examples/integrations/discord-webhook) | Post a transaction summary to a Discord channel. |
+
+Guides: [How to parse a Solana transaction in Node.js without web3.js](https://blixvip.github.io/solana-tx-parse/parse-solana-transaction-nodejs-without-web3js.html) · [How to see the priority fee a Solana transaction paid](https://blixvip.github.io/solana-tx-parse/solana-transaction-priority-fee.html)
 
 ## API
 
