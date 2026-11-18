@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format is based on 
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-17
+
 ### Fixed
 
 - Count Ed25519 and secp256k1 precompile signatures in the base fee so they are no longer attributed to the priority fee. Thanks [@Golden007-prog](https://github.com/Golden007-prog) (#6).
