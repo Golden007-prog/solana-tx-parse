@@ -49,3 +49,7 @@ Every merged contributor is credited by GitHub handle in the release notes and i
 ## Code of conduct
 
 This project follows the [Code of Conduct](CODE_OF_CONDUCT.md). Be kind and assume good intent.
+
+## Becoming a maintainer
+
+See [MAINTAINERS.md](MAINTAINERS.md) for the path from first PR to maintainer.
