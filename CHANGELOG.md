@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format is based on 
 
 ## [Unreleased]
 
+### Fixed
+
+- The CLI reports missing or invalid `--rpc` URLs before sending a request.
+
 ## [1.0.2] - 2026-11-17
 
 ### Fixed

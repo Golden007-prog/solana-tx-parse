@@ -70,7 +70,7 @@ Transfers
   …
 ```
 
-Add `--json` for the full result, `--rpc <url>` (or `SOLANA_RPC_URL`) for your own endpoint.
+Add `--json` for the full result, `--rpc <url>` (or `SOLANA_RPC_URL`) for your own endpoint. The `--rpc` flag requires a valid HTTP or HTTPS URL.
 
 As a library:
 

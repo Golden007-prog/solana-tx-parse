@@ -93,3 +93,22 @@ test("the CLI prints help offline and refuses a bad signature", () => {
   assert.equal(bad.status, 1);
   assert.match(bad.stderr, /InvalidInputError: not a transaction signature/);
 });
+
+test("the CLI requires an HTTP(S) URL after --rpc", () => {
+  const cli = fileURLToPath(new URL("../bin/cli.js", import.meta.url));
+  const run = (...args) => spawnSync(process.execPath, [cli, "not-a-signature", ...args], { encoding: "utf8" });
+
+  for (const args of [["--rpc"], ["--rpc", ""], ["--rpc", "--json", "https://rpc.example"]]) {
+    const missing = run(...args);
+    assert.equal(missing.status, 1);
+    assert.match(missing.stderr, /--rpc requires a URL/);
+  }
+  for (const url of ["ftp://x", "https://"]) {
+    const invalid = run("--rpc", url);
+    assert.equal(invalid.status, 1);
+    assert.match(invalid.stderr, /--rpc expects a valid HTTP or HTTPS URL/);
+  }
+  const valid = run("--rpc", "https://rpc.example");
+  assert.equal(valid.status, 1);
+  assert.match(valid.stderr, /InvalidInputError: not a transaction signature/);
+});

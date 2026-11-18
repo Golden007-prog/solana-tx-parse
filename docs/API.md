@@ -114,7 +114,7 @@ Each ID was checked on 2026-11-17 against the project's own source or documentat
 solana-tx-parse <signature>          readable summary
 solana-tx-parse <signature> --json   the full parsed result
 solana-tx-parse <signature> --logs   include the program logs (with --json)
---rpc <url> or SOLANA_RPC_URL        the RPC to use
+--rpc <url> or SOLANA_RPC_URL        the RPC to use; --rpc requires an HTTP(S) URL
 ```
 
 Exit code 0 on success, 1 on any error (printed as `<ErrorName>: <message>` on stderr).
